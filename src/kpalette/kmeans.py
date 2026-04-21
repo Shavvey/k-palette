@@ -11,5 +11,10 @@ def get_pixel_data(file_path: plib.Path) -> NDArray:
     return np.asarray(image)
 
 
+def get_resize_image(file_path: str, resize_dims: tuple[int, int]):
+    image = Image.open(file_path).convert("RGB")
+    image = image.resize(resize_dims)
+    image.save("images/image_resized.png")
+
 def k_means(k: int):
     pass
