@@ -84,8 +84,6 @@ class Plot3DPoints(ThreeDScene):
         self.play(FadeOut(axes, points, centroids))
 
         point_assignments: list[VGroup] = [VGroup() for _ in range(K_VAL)]
-        # FIX: object cannot serve as key because it is not hashable
-        centroid_to_vgroup_dict = {centroids.points[i]: i for i in range(K_VAL)}
 
         text = Paragraph("Assign points to these centroids based on minimum distance")
         for p in points.points:
@@ -97,7 +95,13 @@ class Plot3DPoints(ThreeDScene):
                     min = d
                     # Record centroid with the mimimum distance
                     centroid = c
-            point_assignments[centroid_to_vgroup_dict[centroid]].add(p)
+
+
+def get_centroid_index(centroids: list[VGroup], centroid: mtyp.Point3D_Array) -> int:
+    for i, c in enumerate(centroids):
+        if c.points == centroid:
+            return i
+    return -1
 
 
 if __name__ == "__main__":
