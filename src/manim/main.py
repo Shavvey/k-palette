@@ -52,49 +52,75 @@ class Plot3DPoints(ThreeDScene):
                 radius=0.05,
             )
             points.add(dot)
-            points = points.append_points(dot.points)
         text = Paragraph("First plot the pixels...")
         self.play(Write(text))
         self.wait(1)
         self.play(Unwrite(text))
+
         self.add(axes)
         self.play(Create(points), run_time=3)
         self.wait(1)
+
         self.play(FadeOut(axes, points))
-        text = Paragraph("Then init the centroids...", t2c={"centroids": YELLOW})
+        text = Tex(r"Then init the k centroids at random points $C_1$, $C_2$, $C_3$")
         self.play(Write(text))
+        self.wait(1)
         self.play(Unwrite(text))
         self.wait(1)
-
+        color_arr = [RED, BLUE, GREEN]
         # Then plot figure out the centroids and plot them
         rng = np.random.default_rng()
-        centroids = VGroup()
-        for _ in range(K_VAL):
+        centroids: list[VGroup] = [VGroup() for _ in range(K_VAL)]
+        centroid_labels = VGroup()
+        for k in range(K_VAL):
+            x = rng.random
+            y = rng.random
+            z = rng.random
             dot = Dot(
                 point=axes.c2p(rng.random(), rng.random(), rng.random()),
-                color=YELLOW,
+                color=color_arr[k],
                 radius=0.05,
             )
-            centroids.add(dot)
-        self.play(FadeIn(axes, points))
-        self.play(Create(centroids), run_time=3)
-        self.wait(2)
-        self.play(FadeOut(axes, points, centroids))
+            label = Text(f"C{k+1}", color=color_arr[k]).next_to(dot, UR, buff=0.001)
+            centroids[k].add(dot)
+            centroids[k].append_points(np.array([x, y, z]))
+            centroid_labels.add(label)
 
-        point_assignments: list[VGroup] = [VGroup() for _ in range(K_VAL)]
+        self.play(FadeIn(axes, points))
+        for k in range(K_VAL):
+            self.play(Create(centroids[k]), run_time=1)
+        self.play(Create(centroid_labels), run_time=1)
+
+        self.wait(2)
+
+        for k in range(K_VAL):
+            self.play(FadeOut(centroids[k]))
+        self.play(FadeOut(axes, points))
 
         text = Paragraph("Assign points to these centroids based on minimum distance")
         for p in points.points:
             min: float = MIN_SENTINEL
             centroid_idx = 0
-            for c in centroids:
-                d = distance(c.points[0], p)
+            for k in range(K_VAL):
+                c = centroids[k]
+                d = distance(c.points, p)
                 if d < min:
                     min = d
                     # Record centroid with the mimimum distance
-                    c.add(Dot(p))
+                    c.add(Dot(p, radius=0.01))
                     print(f"Assigned centroid idx: {centroid_idx}")
                 centroid_idx += 1
+
+        self.play(FadeIn(axes))
+        for k in range(K_VAL):
+            self.play(FadeIn(centroids[k]))
+
+        self.wait(2)
+
+        for k in range(K_VAL):
+            self.play(FadeOut(centroids[k]))
+
+        self.play(FadeOut(axes))
 
 
 def get_centroid_index(centroids: VGroup, centroid: mtyp.Point3D_Array) -> int:
