@@ -51,6 +51,7 @@ class Plot3DPoints(ThreeDScene):
                 color=rgb_to_color(pixel),
                 radius=0.05,
             )
+            points.append_points(np.array([pixel[0], pixel[1], pixel[2]]))
             points.add(dot)
         text = Paragraph("First plot the pixels...")
         self.play(Write(text))
@@ -73,23 +74,23 @@ class Plot3DPoints(ThreeDScene):
         centroids: list[VGroup] = [VGroup() for _ in range(K_VAL)]
         centroid_labels = VGroup()
         for k in range(K_VAL):
-            x = rng.random
-            y = rng.random
-            z = rng.random
+            x = rng.random()
+            y = rng.random()
+            z = rng.random()
             dot = Dot(
-                point=axes.c2p(rng.random(), rng.random(), rng.random()),
+                point=axes.c2p(x, y, z),
                 color=color_arr[k],
                 radius=0.05,
             )
             label = Text(f"C{k+1}", color=color_arr[k]).next_to(dot, UR, buff=0.001)
             centroids[k].add(dot)
-            centroids[k].append_points(np.array([x, y, z]))
+            # FIX
+            # centroids[k].append_points(np.array([x, y, z]))
             centroid_labels.add(label)
 
-        self.play(FadeIn(axes, points))
         for k in range(K_VAL):
-            self.play(Create(centroids[k]), run_time=1)
-        self.play(Create(centroid_labels), run_time=1)
+            self.play(FadeIn(centroids[k]))
+        self.play(FadeIn(centroid_labels))
 
         self.wait(2)
 
@@ -103,10 +104,11 @@ class Plot3DPoints(ThreeDScene):
             centroid_idx = 0
             for k in range(K_VAL):
                 c = centroids[k]
-                d = distance(c.points, p)
+                d = distance(c.points[0], p)
                 if d < min:
                     min = d
                     # Record centroid with the mimimum distance
+                    c.append_points(p)
                     c.add(Dot(p, radius=0.01))
                     print(f"Assigned centroid idx: {centroid_idx}")
                 centroid_idx += 1
@@ -116,9 +118,6 @@ class Plot3DPoints(ThreeDScene):
             self.play(FadeIn(centroids[k]))
 
         self.wait(2)
-
-        for k in range(K_VAL):
-            self.play(FadeOut(centroids[k]))
 
         self.play(FadeOut(axes))
 
