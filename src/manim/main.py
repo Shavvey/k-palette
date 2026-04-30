@@ -1,5 +1,3 @@
-import kpalette.kmeans as k
-import pathlib as p
 import math as m
 
 from manim import *
@@ -8,6 +6,7 @@ import numpy as np
 from PIL import Image
 
 K_VAL = 3
+
 DEF_INSTITIAL_WAIT = 1
 MIN_SENTINEL = 1 << 32
 
@@ -77,7 +76,6 @@ class Plot3DPoints(ThreeDScene):
                 radius=0.05,
             )
             centroids.add(dot)
-            centroids = centroids.append_points(dot.points)
         self.play(FadeIn(axes, points))
         self.play(Create(centroids), run_time=3)
         self.wait(2)
@@ -88,18 +86,20 @@ class Plot3DPoints(ThreeDScene):
         text = Paragraph("Assign points to these centroids based on minimum distance")
         for p in points.points:
             min: float = MIN_SENTINEL
-            centroid = None
-            for c in centroids.points:
-                d = distance(c, p)
+            centroid_idx = 0
+            for c in centroids:
+                d = distance(c.points[0], p)
                 if d < min:
                     min = d
                     # Record centroid with the mimimum distance
-                    centroid = c
+                    c.add(Dot(p))
+                    print(f"Assigned centroid idx: {centroid_idx}")
+                centroid_idx += 1
 
 
-def get_centroid_index(centroids: list[VGroup], centroid: mtyp.Point3D_Array) -> int:
+def get_centroid_index(centroids: VGroup, centroid: mtyp.Point3D_Array) -> int:
     for i, c in enumerate(centroids):
-        if c.points == centroid:
+        if c.points.all() == centroid.all():
             return i
     return -1
 

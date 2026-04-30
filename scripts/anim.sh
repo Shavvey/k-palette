@@ -1,5 +1,5 @@
 #!/bin/bash
 
-MAIN=src/main.py SCENE=Plot3DPoints
+MAIN=src/manim/main.py SCENE=Plot3DPoints
 
 manim -pql $MAIN $SCENE

@@ -1,2 +1,2 @@
 [tool.pyright]
-include = ["src", "src/palette/*.py"]
+include = ["src", "src/kpalette/*.py"]
